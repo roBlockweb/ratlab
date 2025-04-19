@@ -1,0 +1,43 @@
+#!/bin/bash
+
+# Codex - AI-powered Development Environment Launcher
+# This script activates the virtual environment and runs Codex
+
+# Get the directory of this script
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
+# Print colorful banner
+echo -e "\033[1;36m"
+echo "=================================="
+echo "   Codex - AI Dev Environment     "
+echo "=================================="
+echo -e "\033[0m"
+
+# Activate virtual environment if it exists
+if [ -d "$SCRIPT_DIR/venv" ]; then
+    echo "Activating virtual environment..."
+    source "$SCRIPT_DIR/venv/bin/activate"
+else
+    echo "Virtual environment not found. Running setup..."
+    python3 -m venv "$SCRIPT_DIR/venv"
+    source "$SCRIPT_DIR/venv/bin/activate"
+    pip install -r "$SCRIPT_DIR/requirements.txt"
+fi
+
+# Check for OpenAI API key
+if [ ! -f "$SCRIPT_DIR/.env" ] || ! grep -q "OPENAI_API_KEY" "$SCRIPT_DIR/.env"; then
+    echo "OpenAI API key not found in .env file."
+    read -p "Enter your OpenAI API key: " API_KEY
+    echo "OPENAI_API_KEY=$API_KEY" > "$SCRIPT_DIR/.env"
+    echo "API key saved to .env file."
+fi
+
+# Run Codex
+echo "Starting Codex..."
+cd "$SCRIPT_DIR"
+python codex.py --interactive
+
+# Deactivate virtual environment when done
+deactivate
+
+echo "Codex session ended."
